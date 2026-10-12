@@ -4,11 +4,15 @@
   <img src="static/icons/icon.svg" width="96" alt="Groly" />
 </p>
 
-A mobile-first **grocery list, health & nutrition tracker, and meal planner** built for self-hosting — designed for your phone, not adapted to it. Every interaction is touch-optimized: bottom navigation, large tap targets, swipe gestures, and offline support so it works without signal in the store. Also fully usable in a desktop browser.
+Groly is a self-hosted app for **grocery lists, recipes, meal planning, and health and nutrition tracking**. The mobile interface puts navigation and main actions at the bottom of the screen, within thumb reach, so you can quickly add and check off shopping items.
 
-Groly is a **PWA (Progressive Web App)**. Install it to your home screen on iOS or Android to unlock the full experience: offline mode, push notifications, barcode scanner, and location-based list opening all require the installed PWA.
+Shopping lists work **offline** and sync automatically when you reconnect. You can also share lists with other users to shop together, with changes synced in real time.
 
-Self-hosted, runs as a lightweight Docker container. Ready for **Unraid** and any other Docker-based home server setup. Designed for families and small teams — no open registration, users are invited by the admin.
+Import recipes from websites, add ingredients to shopping lists, and plan meals for the week. Track calories, macronutrients, supplements, water, caffeine, mood, and meditation, with goals, reminders, and history views. More features and screenshots are listed below.
+
+Run Groly on your own server with **Docker Compose** or install it through **Unraid Community Applications**. Use it in a browser on your phone or computer, or add it to your home screen on iOS or Android as a **Progressive Web App (PWA)**.
+
+**HTTPS is required** for offline mode, PWA installation, push notifications, barcode scanning, and location-based list opening. The admin invites users via one-time links; there is no public registration.
 
 ## Features
 
