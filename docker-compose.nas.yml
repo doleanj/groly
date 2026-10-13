@@ -1,0 +1,25 @@
+# NAS deployment (Synology Container Manager project "groly"): runs the fork's image built by .github/workflows/docker.yml.
+# Put ADMIN_PASSWORD (and the optional VAPID keys) in a .env next to this file, never in git.
+services:
+  groly:
+    image: ghcr.io/doleanj/groly:edge
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=/app/data/groly.db
+      - ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:?Set ADMIN_PASSWORD in .env}
+      - ORIGIN=${ORIGIN:-https://groly.nashome}
+      - VAPID_PUBLIC_KEY=${VAPID_PUBLIC_KEY:-}
+      - VAPID_PRIVATE_KEY=${VAPID_PRIVATE_KEY:-}
+      - VAPID_SUBJECT=${VAPID_SUBJECT:-mailto:admin@groly.local}
+      - PUBLIC_VAPID_PUBLIC_KEY=${VAPID_PUBLIC_KEY:-}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/auth/me"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
