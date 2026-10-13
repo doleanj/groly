@@ -1,10 +1,11 @@
 # NAS deployment (Synology Container Manager project "groly"): runs the fork's image built by .github/workflows/docker.yml.
+# Host port is 3040 (override with GROLY_PORT in .env) because 3000 is taken by another container on the NAS; the Web Station portal proxies to http://localhost:3040.
 # Put ADMIN_PASSWORD (and the optional VAPID keys) in a .env, and the Watchtower settings in watchtower.env, next to this file, never in git.
 services:
   groly:
     image: ghcr.io/doleanj/groly:edge
     ports:
-      - "3000:3000"
+      - "${GROLY_PORT:-3040}:3000"
     volumes:
       - ./data:/app/data
     environment:
