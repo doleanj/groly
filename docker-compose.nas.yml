@@ -32,7 +32,13 @@ services:
   # Notifications go to Synology Chat through the same bridge as the wine-cellar project (see watchtower.env.example).
   watchtower:
     image: nickfedor/watchtower:latest
-    env_file: watchtower.env
+    # Shared token + HTTP API switches (one file for every Watchtower, managed by synology-chat-webhook/deploy/nas-watchtower-token.sh),
+    # then this project's own watchtower.env (notification URL only). Later files win.
+    env_file:
+      - /volume1/docker/secrets/watchtower.env
+      - watchtower.env
+    ports:
+      - "8097:8080"
     environment:
       - WATCHTOWER_LABEL_ENABLE=true
       - WATCHTOWER_CLEANUP=true
