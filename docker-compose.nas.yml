@@ -1,5 +1,5 @@
 # NAS deployment (Synology Container Manager project "groly"): runs the fork's image built by .github/workflows/docker.yml.
-# Put ADMIN_PASSWORD (and the optional VAPID keys) in a .env next to this file, never in git.
+# Put ADMIN_PASSWORD (and the optional VAPID keys) in a .env, and the Watchtower settings in watchtower.env, next to this file, never in git.
 services:
   groly:
     image: ghcr.io/doleanj/groly:edge
@@ -18,8 +18,24 @@ services:
       - VAPID_SUBJECT=${VAPID_SUBJECT:-mailto:admin@groly.local}
       - PUBLIC_VAPID_PUBLIC_KEY=${VAPID_PUBLIC_KEY:-}
     restart: unless-stopped
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/auth/me"]
       interval: 30s
       timeout: 5s
       retries: 3
+
+  # Pulls a new :edge image after each push to main and restarts only containers labelled above.
+  # Notifications go to Synology Chat through the same bridge as the wine-cellar project (see watchtower.env.example).
+  watchtower:
+    image: nickfedor/watchtower:latest
+    env_file: watchtower.env
+    environment:
+      - WATCHTOWER_LABEL_ENABLE=true
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_POLL_INTERVAL=${WATCHTOWER_POLL_INTERVAL:-300}
+      - WATCHTOWER_NOTIFICATIONS_HOSTNAME=groly
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
