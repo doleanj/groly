@@ -646,3 +646,30 @@ export type NutritionMealFavorite = typeof nutritionMealFavorites.$inferSelect;
 export type NutritionMealFavoriteComponent = typeof nutritionMealFavoriteComponents.$inferSelect;
 export type RecipeNutritionComponent = typeof recipeNutritionComponents.$inferSelect;
 export type NutritionGoal = typeof nutritionGoals.$inferSelect;
+
+// =========================================================================
+// Health events (shared household log, e.g. a cat's coughing episodes)
+// =========================================================================
+
+// Not scoped to a user on purpose: every user of the instance sees and edits the same log.
+// `subject` names who it is about (the cat's name), so the same table serves other pets or people later.
+export const healthEvents = sqliteTable('health_events', {
+	id: text('id').primaryKey(),
+	subject: text('subject').notNull(),
+	occurredAt: integer('occurred_at').notNull(), // ms epoch
+	symptoms: text('symptoms').notNull().default('[]'), // JSON array of strings
+	location: text('location'),
+	activity: text('activity'), // what the subject was doing
+	medicineGiven: integer('medicine_given', { mode: 'boolean' }).notNull().default(false),
+	note: text('note'),
+	createdBy: text('created_by').references(() => users.id, { onDelete: 'set null' }),
+	clientLogId: text('client_log_id'),
+	createdAt: integer('created_at').notNull(),
+	updatedAt: integer('updated_at').notNull()
+}, (t) => [
+	index('health_events_occurred_at_idx').on(t.occurredAt),
+	index('health_events_subject_idx').on(t.subject),
+	uniqueIndex('health_events_client_log_id_unique').on(t.createdBy, t.clientLogId)
+]);
+
+export type HealthEvent = typeof healthEvents.$inferSelect;
