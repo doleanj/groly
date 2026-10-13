@@ -7,6 +7,7 @@
 	import AppBottomNav from '$lib/components/AppBottomNav.svelte';
 	import { t, currentLang, setLang } from '$lib/i18n.svelte';
 	import { userSettings } from '$lib/userSettings.svelte';
+	import { RADIUS_OPTIONS_M } from '$lib/geofence';
 	import { CATEGORY_LABELS } from '$lib/categories';
 	import { validatePasswordRule, getPasswordHint } from '$lib/password';
 	import { shortcuts, type Shortcut, type ShortcutAction } from '$lib/shortcuts.svelte';
@@ -1100,9 +1101,27 @@
 					<div class="px-5 pb-5">
 						<p class="text-xs mb-3 leading-relaxed" style="color: var(--color-on-surface-variant)">
 							{currentLang() === 'en'
-								? 'Automatically opens a list when you open the app at a saved location (within 100 m). Works when resuming from background too.'
-								: 'Öffnet eine Liste automatisch, wenn du die App an einem gespeicherten Standort öffnest (innerhalb von 100 m). Funktioniert auch beim Wechsel aus dem Hintergrund.'}
+								? 'Automatically opens a list when you open the app at a saved location (within ' + userSettings.locationNavRadiusM + ' m). Works when resuming from background too.'
+								: 'Öffnet eine Liste automatisch, wenn du die App an einem gespeicherten Standort öffnest (innerhalb von ' + userSettings.locationNavRadiusM + ' m). Funktioniert auch beim Wechsel aus dem Hintergrund.'}
 						</p>
+						<div class="mb-3">
+							<p class="text-xs mb-2" style="color: var(--color-on-surface-variant)">
+								{currentLang() === 'en'
+									? 'Radius (use a larger one for big shopping centres). If several lists are in range, the nearest opens.'
+									: 'Radius (grösser wählen bei grossen Einkaufszentren). Liegen mehrere Listen in Reichweite, öffnet sich die nächste.'}
+							</p>
+							<div class="flex gap-2" role="radiogroup" aria-label="Radius">
+								{#each RADIUS_OPTIONS_M as r (r)}
+									<button
+										role="radio"
+										aria-checked={userSettings.locationNavRadiusM === r}
+										onclick={() => { userSettings.locationNavRadiusM = r; }}
+										class="px-3 py-1.5 rounded-full text-xs font-medium"
+										style="background-color: {userSettings.locationNavRadiusM === r ? 'var(--color-primary)' : 'var(--color-surface-container)'}; color: {userSettings.locationNavRadiusM === r ? 'var(--color-on-primary)' : 'var(--color-on-surface-variant)'}"
+									>{r} m</button>
+								{/each}
+							</div>
+						</div>
 						<div class="rounded-xl px-4 py-3 text-xs leading-relaxed mb-2"
 						     style="background-color: var(--color-surface-container); color: var(--color-on-surface-variant)">
 							{currentLang() === 'en'

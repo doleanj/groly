@@ -1,6 +1,7 @@
 import { browser } from '$app/environment';
 import { type UserSettings, type ListCategorySettings, type Shortcut, DEFAULT_SETTINGS } from '$lib/userSettingsTypes';
 import { DEFAULT_CATEGORY_ORDER } from '$lib/categories';
+import { normalizeRadius } from '$lib/geofence';
 export type { UserSettings, ListCategorySettings, Shortcut } from '$lib/userSettingsTypes';
 export { DEFAULT_SETTINGS } from '$lib/userSettingsTypes';
 import type { AvailableLanguageTag } from '$lib/paraglide/runtime';
@@ -107,6 +108,7 @@ let _categoryOrder = $state<string[]>(initial.categoryOrder);
 let _listCategorySettings = $state<Record<string, ListCategorySettings>>(cache.listCategorySettings ?? {});
 let _shortcuts = $state<Shortcut[]>(cache.shortcuts ?? []);
 let _locationNavEnabled = $state<boolean>(cache.locationNavEnabled ?? false);
+let _locationNavRadiusM = $state<number>(normalizeRadius(cache.locationNavRadiusM));
 let _listLocationDisabled = $state<string[]>(cache.listLocationDisabled ?? []);
 let _itemLayout = $state<'grid' | 'list'>(cache.itemLayout ?? 'grid');
 let _showAllCheckedItems = $state<boolean>(cache.showAllCheckedItems ?? false);
@@ -165,6 +167,7 @@ function currentSettings(): UserSettings {
 		listCategorySettings: _listCategorySettings,
 		shortcuts: _shortcuts,
 		locationNavEnabled: _locationNavEnabled,
+		locationNavRadiusM: _locationNavRadiusM,
 		listLocationDisabled: _listLocationDisabled,
 		itemLayout: _itemLayout,
 		showAllCheckedItems: _showAllCheckedItems,
@@ -281,6 +284,8 @@ export const userSettings = {
 	// Location navigation
 	get locationNavEnabled() { return _locationNavEnabled; },
 	set locationNavEnabled(v: boolean) { _locationNavEnabled = v; scheduleSave({ locationNavEnabled: v }); },
+	get locationNavRadiusM() { return _locationNavRadiusM; },
+	set locationNavRadiusM(v: number) { _locationNavRadiusM = normalizeRadius(v); scheduleSave({ locationNavRadiusM: _locationNavRadiusM }); },
 
 	isListLocationDisabled(listId: string): boolean {
 		return _listLocationDisabled.includes(listId);
@@ -406,6 +411,7 @@ function applySettings(settings: UserSettings) {
 	_listCategorySettings = settings.listCategorySettings ?? {};
 	_shortcuts = settings.shortcuts ?? [];
 	_locationNavEnabled = settings.locationNavEnabled ?? false;
+	_locationNavRadiusM = normalizeRadius(settings.locationNavRadiusM);
 	_listLocationDisabled = settings.listLocationDisabled ?? [];
 	_itemLayout = settings.itemLayout ?? 'grid';
 	_showAllCheckedItems = settings.showAllCheckedItems ?? false;
