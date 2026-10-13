@@ -26,6 +26,7 @@ export type UserSettings = {
 	listCategorySettings?: Record<string, ListCategorySettings>;
 	shortcuts?: Shortcut[];
 	locationNavEnabled?: boolean;
+	locationNavRadiusM?: number;
 	listLocationDisabled?: string[];
 	itemLayout?: 'grid' | 'list';
 	showAllCheckedItems?: boolean;
