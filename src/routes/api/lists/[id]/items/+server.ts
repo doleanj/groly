@@ -98,6 +98,7 @@ export const POST: RequestHandler = async (event) => {
 	schedulePushForItemAdded({
 		listId: event.params.id,
 		listName: list.name,
+		locationName: list.locationName,
 		itemName: trimmedName,
 		adderUserId: user!.id,
 		adderUsername: creator?.username ?? 'Jemand',

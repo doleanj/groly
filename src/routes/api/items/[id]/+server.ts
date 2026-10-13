@@ -3,12 +3,13 @@ import type { RequestHandler } from './$types';
 import { authGuard } from '$lib/auth/middleware';
 import { db } from '$lib/db';
 import { lists, items, listMembers, users } from '$lib/db/schema';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, count } from 'drizzle-orm';
 import { emitToListMembers } from '$lib/server/userEvents';
 
 import { now } from '$lib/auth';
 import { isValidCategoryKey } from '$lib/categories';
 import { toUpdatedItemEventPayload } from '$lib/server/itemEventPayload';
+import { postChatEvent } from '$lib/server/chatEvents';
 
 async function getWritableItem(itemId: string, userId: string) {
 	const item = db.select().from(items).where(eq(items.id, itemId)).get();
@@ -65,6 +66,18 @@ export const PUT: RequestHandler = async (event) => {
 		? (body.isChecked && !item.isChecked ? -1 : !body.isChecked && item.isChecked ? 1 : 0)
 		: 0;
 	emitToListMembers(item.listId, { type: 'item_updated', listId: item.listId, item: toUpdatedItemEventPayload(updated, createdByUsername), openCountDelta, byUserId: user!.id });
+
+	if (body.isChecked === true && !item.isChecked) {
+		const open = db.select({ n: count() }).from(items).where(and(eq(items.listId, item.listId), eq(items.isChecked, false))).get()?.n ?? 0;
+		if (open === 0) {
+			const list = db.select().from(lists).where(eq(lists.id, item.listId)).get();
+			const total = db.select({ n: count() }).from(items).where(eq(items.listId, item.listId)).get()?.n ?? 0;
+			if (list) {
+				const byUsername = db.select({ username: users.username }).from(users).where(eq(users.id, user!.id)).get()?.username ?? 'Jemand';
+				postChatEvent({ type: 'list_complete', listId: list.id, listName: list.name, locationName: list.locationName, byUsername, itemCount: total, link: `/listen/${list.id}` });
+			}
+		}
+	}
 
 	return json({ ok: true });
 };
