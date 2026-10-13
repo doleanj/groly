@@ -18,6 +18,10 @@ services:
       - VAPID_PRIVATE_KEY=${VAPID_PRIVATE_KEY:-}
       - VAPID_SUBJECT=${VAPID_SUBJECT:-mailto:admin@groly.local}
       - PUBLIC_VAPID_PUBLIC_KEY=${VAPID_PUBLIC_KEY:-}
+      # Synology Chat events through the synology-chat-webhook bridge (all three set = on). The bridge must know this client.
+      - GROLY_CHAT_URL=${GROLY_CHAT_URL:-}
+      - GROLY_CHAT_CLIENT=${GROLY_CHAT_CLIENT:-}
+      - GROLY_CHAT_SECRET=${GROLY_CHAT_SECRET:-}
     restart: unless-stopped
     labels:
       - com.centurylinklabs.watchtower.enable=true

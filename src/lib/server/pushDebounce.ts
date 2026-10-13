@@ -1,10 +1,12 @@
 import { sendPushToListMembers } from './pushNotifications';
+import { postChatEvent } from './chatEvents';
 
 type PendingPush = {
 	timer: ReturnType<typeof setTimeout>;
 	items: Array<{ name: string; username: string }>;
 	adderUserIds: Set<string>;
 	listName: string;
+	locationName: string | null;
 	url: string;
 };
 
@@ -15,12 +17,14 @@ const DEBOUNCE_MS = 8000;
 export function schedulePushForItemAdded(params: {
 	listId: string;
 	listName: string;
+	locationName?: string | null;
 	itemName: string;
 	adderUserId: string;
 	adderUsername: string;
 	url: string;
 }) {
 	const { listId, listName, itemName, adderUserId, adderUsername, url } = params;
+	const locationName = params.locationName ?? null;
 	const existing = pending.get(listId);
 
 	if (existing) {
@@ -34,6 +38,7 @@ export function schedulePushForItemAdded(params: {
 			items: [{ name: itemName, username: adderUsername }],
 			adderUserIds: new Set([adderUserId]),
 			listName,
+			locationName,
 			url
 		});
 	}
@@ -44,7 +49,9 @@ async function firePush(listId: string) {
 	if (!data) return;
 	pending.delete(listId);
 
-	const { items, adderUserIds, listName, url } = data;
+	const { items, adderUserIds, listName, locationName, url } = data;
+
+	postChatEvent({ type: 'items_added', listId, listName, locationName, items, link: url });
 	const adders = [...adderUserIds];
 
 	let title: string;
