@@ -54,3 +54,49 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  # Same as the other doleanj projects: one pre-release "build-<date>-<sha>" per push to main, titled with the newest commit
+  # and listing the commits since the previous one. The synology-chat-webhook bridge reads the latest release for its
+  # Watchtower messages (config.release_notes: "groly": "doleanj/groly"). Releases created with GITHUB_TOKEN do not
+  # trigger the "release: published" build above.
+  release-notes:
+    needs: build-and-push
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Create build release with notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          SHORT="${GITHUB_SHA::7}"
+          TAG="build-$(date -u +%Y%m%d-%H%M)-$SHORT"
+          PREV="$(gh release list --limit 1 --json tagName --jq '.[0].tagName // empty')"
+          if [ -n "$PREV" ] && git rev-parse -q --verify "refs/tags/$PREV" >/dev/null; then
+            RANGE="$(git rev-list -n1 "$PREV")..$GITHUB_SHA"
+          else
+            RANGE="-n 15 $GITHUB_SHA"
+          fi
+          TITLE="$(git log -1 --pretty=%s)"
+          {
+            echo "## What's new"
+            echo
+            git log --reverse --no-merges --pretty=format:'### %s (`%h`)%n%n%b%n' $RANGE \
+              | grep -v -E '^(Co-Authored-By|Claude-Session):'
+            echo
+            echo "## Images"
+            echo
+            echo "- \`ghcr.io/${{ github.repository }}:edge\`"
+            if [ -n "$PREV" ]; then
+              echo
+              echo "Full diff: https://github.com/${{ github.repository }}/compare/$PREV...$TAG"
+            fi
+          } > notes.md
+          gh release create "$TAG" --target "$GITHUB_SHA" --prerelease --title "$TITLE" --notes-file notes.md
