@@ -22,7 +22,8 @@ services:
     labels:
       - com.centurylinklabs.watchtower.enable=true
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/auth/me"]
+      # /login is public (200); upstream's /api/auth/me answers 401 when logged out, which marked the container unhealthy.
+      test: ["CMD", "wget", "-qO", "/dev/null", "http://127.0.0.1:3000/login"]
       interval: 30s
       timeout: 5s
       retries: 3
