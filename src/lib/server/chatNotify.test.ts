@@ -18,7 +18,12 @@ describe('chat notify', () => {
 		expect(init.method).toBe('POST');
 		const headers = init.headers as Record<string, string>;
 		expect(headers.Authorization).toBe(`Basic ${Buffer.from('groly-app:s3cret').toString('base64')}`);
-		expect(JSON.parse(init.body as string)).toEqual(added);
+		expect(JSON.parse(init.body as string)).toEqual({ ...added, eventType: 'items_added' });
+	});
+
+	it('makes the link absolute when an origin is configured', () => {
+		const { init } = buildChatRequest({ ...cfg, origin: 'https://groly.nashome/' }, added);
+		expect(JSON.parse(init.body as string).link).toBe('https://groly.nashome/listen/l1');
 	});
 
 	it('does nothing when not configured', async () => {

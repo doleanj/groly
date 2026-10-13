@@ -1,7 +1,7 @@
 // Posts shopping events to the Synology Chat bridge (synology-chat-webhook): POST <url>/message/groly with Basic auth.
 // Pure part (no $env import) so it can be unit tested; chatEvents.ts wires it to the environment.
 
-export type ChatConfig = { url: string; client: string; secret: string };
+export type ChatConfig = { url: string; client: string; secret: string; origin?: string };
 
 export type ChatEvent =
 	| {
@@ -27,12 +27,15 @@ const TIMEOUT_MS = 5000;
 
 export function buildChatRequest(cfg: ChatConfig, event: ChatEvent): { url: string; init: RequestInit } {
 	const auth = Buffer.from(`${cfg.client}:${cfg.secret}`).toString('base64');
+	// eventType selects the bridge template (template.groly.<eventType>.md); the link is made absolute so it is clickable in Chat.
+	const link = cfg.origin ? `${cfg.origin.replace(/\/+$/, '')}${event.link}` : event.link;
+	const payload = { ...event, eventType: event.type, link };
 	return {
 		url: `${cfg.url.replace(/\/+$/, '')}/message/${CHAT_CONTROLLER}`,
 		init: {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json', Authorization: `Basic ${auth}` },
-			body: JSON.stringify(event)
+			body: JSON.stringify(payload)
 		}
 	};
 }
