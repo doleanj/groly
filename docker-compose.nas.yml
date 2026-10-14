@@ -1,6 +1,6 @@
 # NAS deployment (Synology Container Manager project "groly"): runs the fork's image built by .github/workflows/docker.yml.
 # Host port is 3040 (literal on purpose: the Container Manager wizard cannot read ${VAR} ports for the Web Station step) because 3000 is taken by another container on the NAS; the Web Station portal proxies to http://localhost:3040.
-# Put ADMIN_PASSWORD (and the optional VAPID keys) in a .env, and the Watchtower settings in watchtower.env, next to this file, never in git.
+# Secrets live in .env and watchtower.env next to this file, never in git. Keys and first-start notes: docs/nas-deploy.md.
 services:
   groly:
     image: ghcr.io/doleanj/groly:edge
@@ -11,8 +11,10 @@ services:
     environment:
       - NODE_ENV=production
       - DATABASE_URL=/app/data/groly.db
+      # Only read while the database has no users (first start). Remove ADMIN_PASSWORD from .env afterwards so it does not
+      # sit in the container environment; ADMIN_PASSWORD_RESET is the recovery path (see docs/nas-deploy.md).
       - ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
-      - ADMIN_PASSWORD=${ADMIN_PASSWORD:?Set ADMIN_PASSWORD in .env}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-}
       - ORIGIN=${ORIGIN:-https://groly.nashome}
       - VAPID_PUBLIC_KEY=${VAPID_PUBLIC_KEY:-}
       - VAPID_PRIVATE_KEY=${VAPID_PRIVATE_KEY:-}
