@@ -1502,6 +1502,7 @@
 	nutritionTotalKcal={todayMeals.reduce((s, m) => s + m.components.reduce((cs, c) => cs + (c.kcal ?? 0), 0), 0)}
 	nutritionGoalKcal={nutritionGoalKcal}
 	onaddmeal={() => { quickLogOpen = false; goto('/tracker/nutrition?new=1'); }}
+	onaddpet={() => { quickLogOpen = false; goto('/tracker/pet?new=1'); }}
 	onstartmeditation={startMeditation}
 	onrateMood={() => { quickLogOpen = false; moodEntryOpen = true; }}
 	onlogged={(supplementLog) => {

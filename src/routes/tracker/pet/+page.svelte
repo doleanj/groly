@@ -202,6 +202,11 @@
 	onMount(async () => {
 		try { subject = localStorage.getItem(SUBJECT_KEY) ?? ''; } catch { /* optional */ }
 		await load();
+		// opened from the Tracker "+" menu: go straight to the new-event sheet
+		if (new URLSearchParams(location.search).get('new') === '1') {
+			history.replaceState({}, '', location.pathname);
+			openNew();
+		}
 	});
 </script>
 
