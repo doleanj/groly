@@ -17,12 +17,10 @@ export const FORK_CHANGELOG: ForkChangelogEntry[] = [
 		version: 'next',
 		status: 'in-progress',
 		de: [
-			'Übersichtszähler aktualisieren sich nach Änderungen an Artikeln noch nicht ohne Neuladen (wird untersucht)',
-			'Weitere englische Übersetzungen: Benachrichtigungsbereich und Fehlermeldungen'
+			'Übersichtszähler aktualisieren sich nach Änderungen an Artikeln noch nicht ohne Neuladen (wird untersucht)'
 		],
 		en: [
-			'Home-screen counters do not refresh after item changes without a reload yet (being investigated)',
-			'More English translations: notification panel and error messages'
+			'Home-screen counters do not refresh after item changes without a reload yet (being investigated)'
 		]
 	},
 	{
@@ -35,6 +33,16 @@ export const FORK_CHANGELOG: ForkChangelogEntry[] = [
 		en: [
 			'Price watch for items through Web-watcher, with price history and cheapest store',
 			'Admin API for ownership changes, members and backups'
+		]
+	},
+	{
+		version: '2026-10-14.2',
+		status: 'released',
+		de: [
+			'Weitere englische Übersetzungen: Hinweis zu Benachrichtigungen (Abfrage und Fehlermeldung), Admin-Fehlermeldungen und -Beschriftungen, Suche ohne Treffer, Meditations-Startzeit und Dauer, Import-Meldung'
+		],
+		en: [
+			'More English translations: notification prompt and its error message, admin error messages and labels, empty search results, meditation start time and duration, import message'
 		]
 	},
 	{

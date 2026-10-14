@@ -589,13 +589,13 @@
 								{#if isRetro && meditationRetroOpen}
 									<div class="space-y-1.5">
 										<div class="grid grid-cols-[auto_1fr] items-center gap-1.5">
-											<span class="text-[10px] font-semibold" style="color: var(--color-on-surface-variant)">Startzeit</span>
+											<span class="text-[10px] font-semibold" style="color: var(--color-on-surface-variant)">{currentLang() === 'en' ? 'Start time' : 'Startzeit'}</span>
 											<input type="time" bind:value={meditationRetroStartTime}
 												class="w-full min-w-0 h-8 px-1 rounded-xl border-0 outline-none text-center"
 												style="background-color: var(--color-surface-high); color: var(--color-on-surface); font-size: 16px"/>
 										</div>
 										<div class="flex items-center gap-0.5 flex-wrap">
-											<span class="text-[10px] font-semibold shrink-0" style="color: var(--color-on-surface-variant)">Dauer</span>
+											<span class="text-[10px] font-semibold shrink-0" style="color: var(--color-on-surface-variant)">{currentLang() === 'en' ? 'Duration' : 'Dauer'}</span>
 											{#each [5, 10, 15, 20] as min}
 											<button
 												onclick={() => { meditationRetroDuration = min; meditationRetroShowCustom = false; }}

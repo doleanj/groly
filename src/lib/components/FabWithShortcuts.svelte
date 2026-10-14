@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { shortcuts, shortcutMenu } from '$lib/shortcuts.svelte';
+	import { currentLang } from '$lib/i18n.svelte';
 
-	let { onTap, label = 'Hinzufügen', size = 12, color = 'var(--color-primary)' }: { onTap: () => void; label?: string; size?: number; color?: string } = $props();
+	let { onTap, label = currentLang() === 'en' ? 'Add' : 'Hinzufügen', size = 12, color = 'var(--color-primary)' }: { onTap: () => void; label?: string; size?: number; color?: string } = $props();
 
 	let pressTimer: ReturnType<typeof setTimeout> | null = null;
 	let longFired = false;
