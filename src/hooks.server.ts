@@ -29,7 +29,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 		? languageFromAcceptLanguage(event.request.headers.get('accept-language'))
 		: null;
 	const response = await resolve(event, anonymousLang ? {
-		transformPageChunk: ({ html }) => html.replace('<html lang="de">', `<html lang="${anonymousLang}">`)
+		transformPageChunk: ({ html }) => html.replace('<html lang="de"', `<html lang="${anonymousLang}"`)
 	} : {});
 	applySecurityHeaders(response);
 	// API-Antworten nie cachen: die URLs (z.B. /api/supplement-logs?from=…&to=…) sind
