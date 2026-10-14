@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { onMount, type Snippet } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { t, today_reminders_label } from '$lib/i18n.svelte';
+	import { t, today_reminders_label, currentLang } from '$lib/i18n.svelte';
 	import { toLocalDateKey } from '$lib/dates';
 	import { matchSupplementReminderLogs } from '$lib/supplementReminderMatching';
 
-	type Section = 'today' | 'history' | 'nutrition';
+	type Section = 'today' | 'history' | 'nutrition' | 'pet';
 	type ReminderEntry = { scheduleId: string; supplementId: string; name: string };
 	type Reminder = { time: string; entries: ReminderEntry[]; names: string[] };
 	type LogRef = { supplementId: string; loggedAt: number };
@@ -104,15 +104,16 @@
 	function navigate(section: Section) {
 		if (section === 'today') void goto('/tracker', { noScroll: true, keepFocus: true });
 		else if (section === 'history') void goto('/tracker?tab=history', { noScroll: true, keepFocus: true });
+		else if (section === 'pet') void goto('/tracker/pet');
 		else void goto('/tracker/nutrition');
 	}
 
 	function accent(section: Section): string {
 		if (activeSection !== section) return 'var(--color-on-surface-variant)';
-		return section === 'nutrition' ? '#FB923C' : 'var(--color-primary)';
+		return section === 'nutrition' ? '#FB923C' : section === 'pet' ? '#F472B6' : 'var(--color-primary)';
 	}
 
-	onMount(loadReminderState);
+	onMount(() => { if (activeSection !== 'pet') void loadReminderState(); });
 </script>
 
 <div class="tracker-section-nav">
@@ -131,9 +132,19 @@
 				{t.nutrition_label}
 			</button>
 		{/if}
+		<button type="button" class="pet-tab" onclick={() => navigate('pet')} aria-current={activeSection === 'pet' ? 'page' : undefined}
+			aria-label={currentLang() === 'en' ? 'Pet log' : 'Haustier-Log'} title={currentLang() === 'en' ? 'Pet log' : 'Haustier-Log'}
+			style="background-color: {activeSection === 'pet' ? 'color-mix(in srgb, #F472B6 12%, transparent)' : 'transparent'}; color: {accent('pet')}">
+			<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+				<path d="M12 5c.67 0 1.35.09 2 .26 1.78-2 5.03-2.84 6.42-2.26 1.4.58-.42 7-.42 7 .57 1.07 1 2.24 1 3.44C21 17.9 16.97 21 12 21s-9-3-9-7.56c0-1.25.5-2.4 1-3.44 0 0-1.89-6.42-.5-7 1.39-.58 4.72.23 6.5 2.23A9.04 9.04 0 0 1 12 5Z"/>
+				<path d="M8 14v.5"/><path d="M16 14v.5"/><path d="M11.25 16.25h1.5L12 17l-.75-.75Z"/>
+			</svg>
+		</button>
 	</nav>
 
-	{#if activeSection === 'history' && historyControls}
+	{#if activeSection === 'pet'}
+		<!-- the supplement shortcuts below do not apply to the pet log -->
+	{:else if activeSection === 'history' && historyControls}
 		<div class="tracker-section-history">{@render historyControls()}</div>
 	{:else}
 		<div class="tracker-section-actions">
@@ -176,8 +187,9 @@
 
 <style>
 	.tracker-section-nav { overflow: hidden; border: 1px solid var(--bubble-container-border); border-radius: 16px; background: var(--bubble-container-bg); }
-	.tracker-section-tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding: 4px; }
-	.tracker-section-tabs.two-tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+	.tracker-section-tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) 44px; gap: 4px; padding: 4px; }
+	.tracker-section-tabs.two-tabs { grid-template-columns: repeat(2, minmax(0, 1fr)) 44px; }
+	.tracker-section-tabs .pet-tab { display: flex; align-items: center; justify-content: center; padding: 0; }
 	.tracker-section-tabs button { min-width: 0; min-height: 36px; padding: 6px 4px; border-radius: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; font-weight: 650; transition: background-color 160ms cubic-bezier(0.2, 0.8, 0.2, 1), color 160ms cubic-bezier(0.2, 0.8, 0.2, 1); }
 	.tracker-section-tabs button:active { opacity: .7; }
 	.tracker-section-actions { display: flex; min-height: 40px; align-items: stretch; border-top: 1px solid var(--bubble-container-border); }

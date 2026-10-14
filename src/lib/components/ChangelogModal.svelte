@@ -1,11 +1,37 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import type { AvailableLanguageTag } from '$lib/paraglide/runtime';
 
-	let { entries, lang, onClose }: {
-		entries: { version: string; de: string[]; en: string[] }[];
+	import type { ForkChangelogEntry } from '$lib/changelogFork';
+
+	type Entry = { version: string; de: string[]; en: string[]; status?: ForkChangelogEntry['status'] };
+
+	let { entries, forkEntries = null, lang, onClose }: {
+		entries: Entry[];
+		forkEntries?: Entry[] | null;
 		lang: AvailableLanguageTag;
 		onClose: () => void;
 	} = $props();
+
+	const SOURCE_KEY = 'groly_changelog_source';
+	let source = $state<'upstream' | 'fork'>('upstream');
+	onMount(() => {
+		try {
+			if (localStorage.getItem(SOURCE_KEY) === 'fork') source = 'fork';
+		} catch { /* optional */ }
+	});
+
+	function pickSource(s: 'upstream' | 'fork') {
+		source = s;
+		try { localStorage.setItem(SOURCE_KEY, s); } catch { /* optional */ }
+	}
+
+	const shown = $derived(source === 'fork' && forkEntries ? forkEntries : entries);
+	const issuesUrl = $derived(source === 'fork' ? 'https://github.com/doleanj/groly/issues' : 'https://github.com/peterthepeter/groly/issues');
+	const statusLabel = (st: Entry['status']) =>
+		st === 'in-progress' ? (lang === 'en' ? 'In progress' : 'In Arbeit')
+		: st === 'planned' ? (lang === 'en' ? 'Planned' : 'Geplant')
+		: '';
 </script>
 
 <!-- Backdrop -->
@@ -27,7 +53,7 @@
 		<div class="flex items-center gap-2.5">
 			<h2 class="text-lg font-bold" style="color: var(--color-on-surface)">Changelog</h2>
 			<a
-				href="https://github.com/peterthepeter/groly/issues"
+				href={issuesUrl}
 				target="_blank"
 				rel="noopener noreferrer"
 				class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium active:opacity-70"
@@ -54,16 +80,39 @@
 		</button>
 	</div>
 
+	{#if forkEntries}
+		<div class="px-6 pb-2 flex-shrink-0">
+			<div class="flex gap-1 p-1 rounded-full" role="radiogroup" aria-label={lang === 'en' ? 'Changelog source' : 'Quelle'}
+			     style="background-color: var(--bubble-interactive-bg); border: 1px solid var(--bubble-interactive-border)">
+				{#each [['upstream', lang === 'en' ? 'Groly (upstream)' : 'Groly (Original)'], ['fork', lang === 'en' ? 'My changes' : 'Meine Änderungen']] as [key, label] (key)}
+					<button
+						role="radio"
+						aria-checked={source === key}
+						onclick={() => pickSource(key as 'upstream' | 'fork')}
+						class="flex-1 py-1.5 rounded-full text-xs font-semibold active:opacity-70"
+						style="background-color: {source === key ? 'color-mix(in srgb, var(--color-primary) 18%, transparent)' : 'transparent'}; color: {source === key ? 'var(--color-primary)' : 'var(--color-on-surface-variant)'}"
+					>{label}</button>
+				{/each}
+			</div>
+		</div>
+	{/if}
+
 	<!-- Scrollable content -->
 	<div class="overflow-y-auto flex-1 px-6 py-2">
-		{#each entries as entry, i}
+		{#each shown as entry, i}
 			<div class="py-4">
 				<!-- Version badge -->
-				<div class="mb-3">
+				<div class="mb-3 flex items-center gap-2">
 					<span class="inline-flex items-center text-xs font-semibold px-2.5 py-1 rounded-full"
 					      style="background-color: color-mix(in srgb, var(--color-primary) 15%, transparent); color: var(--color-primary)">
-						v{entry.version}
+						{source === 'fork' ? entry.version : `v${entry.version}`}
 					</span>
+					{#if entry.status === 'in-progress' || entry.status === 'planned'}
+						<span class="inline-flex items-center text-[11px] font-semibold px-2 py-0.5 rounded-full"
+						      style="background-color: {entry.status === 'in-progress' ? 'color-mix(in srgb, #F59E0B 18%, transparent)' : 'var(--color-surface-container)'}; color: {entry.status === 'in-progress' ? '#F59E0B' : 'var(--color-on-surface-variant)'}">
+							{statusLabel(entry.status)}
+						</span>
+					{/if}
 				</div>
 
 				<!-- Items -->
@@ -78,7 +127,7 @@
 				</ul>
 			</div>
 
-			{#if i < entries.length - 1}
+			{#if i < shown.length - 1}
 				<div class="h-px" style="background-color: var(--color-outline-variant)"></div>
 			{/if}
 		{/each}

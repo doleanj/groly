@@ -7,6 +7,7 @@
 	import ChangelogModal from '$lib/components/ChangelogModal.svelte';
 	import AboutModal from '$lib/components/AboutModal.svelte';
 	import { CHANGELOG } from '$lib/changelog';
+	import { FORK_CHANGELOG } from '$lib/changelogFork';
 
 	let { open = $bindable(false), user, installPrompt = null }: {
 		open: boolean;
@@ -90,18 +91,6 @@
 				</button>
 				<div class="h-px mx-4" style="background-color: var(--color-outline-variant)"></div>
 			{/if}
-
-			<button
-				onclick={() => navigate('/tracker/pet')}
-				class="w-full flex items-center gap-4 px-4 transition-colors active:opacity-70 text-left"
-				style="height: 44px; background-color: {$page.url.pathname.startsWith('/tracker/pet') ? 'rgba(255,255,255,0.06)' : 'transparent'}"
-			>
-				<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-					<path d="M20.42 4.58a5.4 5.4 0 0 0-7.65 0l-.77.78-.77-.78a5.4 5.4 0 0 0-7.65 7.65l1.06 1.06L12 21.23l7.36-7.94 1.06-1.06a5.4 5.4 0 0 0 0-7.65z"/>
-				</svg>
-				<span class="font-medium text-sm" style="color: var(--color-on-surface)">{currentLang() === 'en' ? 'Pet log' : 'Haustier-Log'}</span>
-			</button>
-			<div class="h-px mx-4" style="background-color: var(--color-outline-variant)"></div>
 
 			<button
 				onclick={() => navigate('/einstellungen')}
@@ -210,6 +199,7 @@
 {#if changelogOpen}
 	<ChangelogModal
 		entries={CHANGELOG.slice(0, 3)}
+		forkEntries={FORK_CHANGELOG}
 		lang={currentLang()}
 		onClose={() => changelogOpen = false}
 	/>
