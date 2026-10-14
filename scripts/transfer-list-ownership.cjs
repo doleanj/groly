@@ -10,6 +10,13 @@
 //   3. apply (takes a consistent backup first: groly.db.bak-<timestamp> in the same folder):
 //        sudo docker exec -w /app groly-groly-1 su-exec node env FROM=admin TO=julien APPLY=1 node /app/data/transfer-list-ownership.cjs
 //
+// Diagnose (read-only, no FROM/TO needed): prints every list with its owner and members and flags anomalies, notably an owner who
+// is ALSO a member of the same list (the app then returns that list twice, once as owned and once as shared, and the shared copy
+// hides the edit and share controls):
+//        sudo docker exec -w /app groly-groly-1 su-exec node env CHECK=1 node /app/data/transfer-list-ownership.cjs
+// Repair that case (backup first, only deletes member rows where the member IS the list owner):
+//        sudo docker exec -w /app groly-groly-1 su-exec node env CHECK=1 FIX_OWNER_MEMBERSHIPS=1 APPLY=1 node /app/data/transfer-list-ownership.cjs
+//
 // Optional: KEEP_OLD_AS_MEMBER=1 adds the previous owner back as a member with write access on each list.
 // Usernames are matched case-insensitively and must resolve to exactly one user each. Passwords are never read or printed.
 // Only lists.owner_id changes (plus updated_at, in seconds like the app). Items, history, trackers and recipes stay as they are.
@@ -27,11 +34,48 @@ function fail(msg) {
 	process.exit(1);
 }
 
-if (!fromName || !toName) fail('set FROM=<current owner username> and TO=<new owner username>');
-if (fromName.toLowerCase() === toName.toLowerCase()) fail('FROM and TO are the same user');
+const check = process.env.CHECK === '1';
+const fixOwnerMemberships = process.env.FIX_OWNER_MEMBERSHIPS === '1';
+
+if (!check && (!fromName || !toName)) fail('set FROM=<current owner username> and TO=<new owner username> (or CHECK=1 to diagnose)');
+if (!check && fromName.toLowerCase() === toName.toLowerCase()) fail('FROM and TO are the same user');
 
 const db = new Database(dbPath);
 db.pragma('busy_timeout = 5000');
+
+if (check) {
+	const rows = db.prepare(`
+		SELECT l.id, l.name, l.owner_id, o.username AS owner,
+		       (SELECT COUNT(*) FROM items i WHERE i.list_id = l.id) AS items
+		FROM lists l LEFT JOIN users o ON o.id = l.owner_id ORDER BY o.username, l.name`).all();
+	const members = db.prepare(`
+		SELECT m.list_id, m.user_id, u.username, m.permission, m.status
+		FROM list_members m LEFT JOIN users u ON u.id = m.user_id`).all();
+	let anomalies = 0;
+	console.log(`${rows.length} list(s), ${db.prepare('SELECT COUNT(*) AS n FROM users').get().n} user(s)`);
+	for (const l of rows) {
+		const ms = members.filter((m) => m.list_id === l.id);
+		const dup = ms.filter((m) => m.user_id === l.owner_id);
+		if (dup.length) anomalies++;
+		console.log(`- ${l.name}  owner=${l.owner ?? '(missing user ' + l.owner_id + ')'}  items=${l.items}  members=` +
+			(ms.length ? ms.map((m) => `${m.username}:${m.permission}/${m.status}`).join(', ') : 'none') +
+			(dup.length ? '   <-- ANOMALY: the owner is also a member (list shows twice, shared copy hides edit/share)' : ''));
+	}
+	console.log(`\nAnomalies: ${anomalies}`);
+	if (!fixOwnerMemberships) process.exit(0);
+	if (!apply) {
+		console.log('FIX_OWNER_MEMBERSHIPS=1 is a dry run without APPLY=1: nothing changed.');
+		process.exit(0);
+	}
+	(async () => {
+		const backup = `${dbPath}.bak-${new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14)}`;
+		await db.backup(backup);
+		console.log(`Backup written: ${backup}`);
+		const n = db.prepare('DELETE FROM list_members WHERE user_id = (SELECT owner_id FROM lists WHERE lists.id = list_members.list_id)').run().changes;
+		console.log(`Removed ${n} owner membership row(s).`);
+	})().catch((e) => fail(e.message));
+	return;
+}
 
 function resolveUser(name) {
 	const rows = db.prepare('SELECT id, username, role FROM users WHERE lower(username) = lower(?)').all(name);
