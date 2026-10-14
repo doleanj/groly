@@ -14,16 +14,6 @@ export type ForkChangelogEntry = {
 
 export const FORK_CHANGELOG: ForkChangelogEntry[] = [
 	{
-		version: 'next',
-		status: 'in-progress',
-		de: [
-			'Übersichtszähler aktualisieren sich nach Änderungen an Artikeln noch nicht ohne Neuladen (wird untersucht)'
-		],
-		en: [
-			'Home-screen counters do not refresh after item changes without a reload yet (being investigated)'
-		]
-	},
-	{
 		version: 'planned',
 		status: 'planned',
 		de: [
@@ -33,6 +23,16 @@ export const FORK_CHANGELOG: ForkChangelogEntry[] = [
 		en: [
 			'Price watch for items through Web-watcher, with price history and cheapest store',
 			'Admin API for ownership changes, members and backups'
+		]
+	},
+	{
+		version: '2026-10-14.3',
+		status: 'released',
+		de: [
+			'Übersichtszähler: nach Änderungen an Artikeln wird beim Zurückkehren auf die Übersicht gewartet, bis der Server sie hat; zusätzliche Aktualisierung beim Zurückholen der App und nach dem Leeren der Offline-Warteschlange'
+		],
+		en: [
+			'Home-screen counters: after item changes, returning to the overview waits until the server has them; also refreshes when the app returns to the front and after the offline queue drains'
 		]
 	},
 	{

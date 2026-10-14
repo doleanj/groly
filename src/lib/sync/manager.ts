@@ -11,6 +11,7 @@ import {
 	userSettingsPatchMatches,
 	type UserSettingsPatch
 } from '$lib/userSettingsSync';
+import { trackMutation } from './mutationSettle';
 
 let activeUserId: string | null = null;
 let syncInitialized = false;
@@ -407,6 +408,7 @@ export function drainPendingMutations(): Promise<void> {
 		drainPromise = null;
 		drainingUserId = null;
 	});
+	trackMutation(drainPromise);
 	return drainPromise;
 }
 
@@ -419,7 +421,9 @@ export async function execute<T>(
 
 	if (networkStore.online) {
 		try {
-			return await onlineAction();
+			const action = onlineAction();
+			trackMutation(Promise.resolve(action).catch(() => undefined));
+			return await action;
 		} catch {
 			// Fallback zu offline queue
 		}

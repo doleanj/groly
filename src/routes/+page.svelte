@@ -3,6 +3,8 @@
 	import { on } from '$lib/sseStore.svelte';
 	import { goto } from '$app/navigation';
 	import { execute, cacheListsData, getOfflineLists, updateOfflineList, deleteOfflineList } from '$lib/sync/manager';
+	import { settleMutations } from '$lib/sync/mutationSettle';
+	import { networkStore } from '$lib/stores/online.svelte';
 	import AppHeader from '$lib/components/AppHeader.svelte';
 	import HamburgerMenu from '$lib/components/HamburgerMenu.svelte';
 	import ListCard from '$lib/components/ListCard.svelte';
@@ -230,6 +232,11 @@
 			loading = false;
 		}
 
+		// Item changes made a moment ago (check, add, delete) may still be on their way to the server. Wait for them,
+		// bounded, so the counts below are not stale; the cached lists above are already on screen.
+		await settleMutations();
+		if (requestVersion !== listsLoadVersion) return;
+
 		try {
 			const res = await fetch('/api/lists');
 			if (!res.ok) throw new Error();
@@ -364,10 +371,23 @@
 		const handleOnline = () => void loadLists();
 		window.addEventListener('online', handleOnline);
 
+		// The live-update stream can be delayed or blocked by a proxy; refresh the counts when the app comes back to the front.
+		const handleVisible = () => { if (document.visibilityState === 'visible') void loadLists(); };
+		document.addEventListener('visibilitychange', handleVisible);
+
 		return () => {
 			window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
 			window.removeEventListener('online', handleOnline);
+			document.removeEventListener('visibilitychange', handleVisible);
 		};
+	});
+
+	// Changes queued while offline are sent later: reload the counts once the queue has drained.
+	let previousPending = networkStore.pendingCount;
+	$effect(() => {
+		const pending = networkStore.pendingCount;
+		if (previousPending > 0 && pending === 0) void loadLists();
+		previousPending = pending;
 	});
 
 	// SSE-Handler: Live-Updates für die Übersicht
