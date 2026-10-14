@@ -5,6 +5,8 @@
 	import HamburgerMenu from '$lib/components/HamburgerMenu.svelte';
 	import AppBottomNav from '$lib/components/AppBottomNav.svelte';
 	import ManageSheetShell from '$lib/components/supplements/ManageSheetShell.svelte';
+	import TrackerSectionNav from '$lib/components/supplements/TrackerSectionNav.svelte';
+	import { userSettings } from '$lib/userSettings.svelte';
 	import { currentLang } from '$lib/i18n.svelte';
 	import { toLocalDateKey } from '$lib/dates';
 
@@ -213,7 +215,11 @@
 
 <HamburgerMenu bind:open={menuOpen} user={data?.user ?? null} />
 
-<main class="px-4 pb-32" style="padding-top: 5.25rem">
+<div class="px-4 pb-3" style="padding-top: 5.25rem">
+	<TrackerSectionNav activeSection="pet" nutritionEnabled={userSettings.nutritionTrackerEnabled} />
+</div>
+
+<main class="px-4 pb-32">
 	{#if suggestions.subjects.length > 1}
 		<div class="flex gap-2 overflow-x-auto pb-3" role="radiogroup" aria-label={tr('Subject', 'Wer')}>
 			{#each suggestions.subjects as s (s)}
