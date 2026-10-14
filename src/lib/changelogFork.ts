@@ -26,6 +26,12 @@ export const FORK_CHANGELOG: ForkChangelogEntry[] = [
 		]
 	},
 	{
+		version: '2026-10-14.5',
+		status: 'released',
+		de: ['Der Browser bietet keine Übersetzung der App mehr an (sie würde Texte einfrieren, die die App aktualisiert); die Sprache stellst du in Groly ein'],
+		en: ['Browsers no longer offer to translate the app (a translated page freezes text the app updates); set the language in Groly instead']
+	},
+	{
 		version: '2026-10-14.4',
 		status: 'released',
 		de: [
