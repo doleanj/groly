@@ -26,6 +26,16 @@ export const FORK_CHANGELOG: ForkChangelogEntry[] = [
 		]
 	},
 	{
+		version: '2026-10-14.4',
+		status: 'released',
+		de: [
+			'Haustier-Log als Kachel mit Katzen-Symbol im Tracker-+-Menü (Anzahl der Woche, direkt zum neuen Eintrag)'
+		],
+		en: [
+			'Pet log as a tile with a cat icon in the Tracker + menu (this week\'s count, straight to a new entry)'
+		]
+	},
+	{
 		version: '2026-10-14.3',
 		status: 'released',
 		de: [
