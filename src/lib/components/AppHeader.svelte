@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { networkStore } from '$lib/stores/online.svelte';
-	import { t, sync_pending } from '$lib/i18n.svelte';
+	import { t, sync_pending, currentLang } from '$lib/i18n.svelte';
 
 	import type { Snippet } from 'svelte';
 
-	let { title = 'Meine Listen', subtitle = '', eyebrow = '', onMenuOpen, onSearch = null, actions = null, hidden = false, onBack = null }: {
+	let { title = currentLang() === 'en' ? 'My lists' : 'Meine Listen', subtitle = '', eyebrow = '', onMenuOpen, onSearch = null, actions = null, hidden = false, onBack = null }: {
 		title?: string;
 		subtitle?: string;
 		eyebrow?: string;

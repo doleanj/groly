@@ -210,7 +210,9 @@
 		pushLoading = true;
 		pushError = '';
 		if (!PUBLIC_VAPID_KEY) {
-			pushError = 'Push-Konfiguration fehlt (PUBLIC_VAPID_PUBLIC_KEY nicht gesetzt).';
+			pushError = currentLang() === 'en'
+				? 'Push is not configured (PUBLIC_VAPID_PUBLIC_KEY is not set).'
+				: 'Push-Konfiguration fehlt (PUBLIC_VAPID_PUBLIC_KEY nicht gesetzt).';
 			pushLoading = false;
 			return;
 		}
@@ -1429,7 +1431,7 @@
 								<p class="text-sm" style="color: var(--color-error)">{t.supplement_import_error}</p>
 							{/if}
 							{#if importResult}
-								<p class="text-sm font-semibold" style="color: var(--color-primary)">{importResult.imported} {importResult.imported === 1 ? 'Eintrag' : 'Einträge'} importiert</p>
+								<p class="text-sm font-semibold" style="color: var(--color-primary)">{importResult.imported} {currentLang() === 'en' ? (importResult.imported === 1 ? 'entry imported' : 'entries imported') : (importResult.imported === 1 ? 'Eintrag importiert' : 'Einträge importiert')}</p>
 								{#if importResult.skipped.length > 0}
 									<div>
 										<p class="text-xs font-medium mb-1" style="color: var(--color-on-surface-variant)">{t.supplement_import_skipped}</p>
@@ -1663,9 +1665,9 @@
 					<path d="M13.73 21a2 2 0 0 1-3.46 0"/>
 				</svg>
 			</div>
-			<h2 class="text-lg font-bold mb-2" style="color: var(--color-on-surface)">Push-Benachrichtigungen</h2>
+			<h2 class="text-lg font-bold mb-2" style="color: var(--color-on-surface)">{currentLang() === 'en' ? 'Push notifications' : 'Push-Benachrichtigungen'}</h2>
 			<p class="text-sm leading-relaxed" style="color: var(--color-on-surface-variant)">
-				Bleib auf dem Laufenden wenn Mitglieder Artikel hinzufügen.
+				{currentLang() === 'en' ? 'Stay up to date when members add items.' : 'Bleib auf dem Laufenden wenn Mitglieder Artikel hinzufügen.'}
 			</p>
 		</div>
 
@@ -1675,7 +1677,7 @@
 				class="flex-1 py-3.5 rounded-full text-sm font-semibold"
 				style="background-color: var(--color-surface-container); color: var(--color-on-surface-variant)"
 			>
-				Später
+				{currentLang() === 'en' ? 'Later' : 'Später'}
 			</button>
 			<button
 				onclick={acceptPushPrompt}
@@ -1683,7 +1685,7 @@
 				class="flex-1 py-3.5 rounded-full text-sm font-semibold disabled:opacity-50"
 				style="background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dim)); color: var(--color-on-primary)"
 			>
-				{pushLoading ? '...' : 'Aktivieren'}
+				{pushLoading ? '...' : currentLang() === 'en' ? 'Enable' : 'Aktivieren'}
 			</button>
 		</div>
 	</div>

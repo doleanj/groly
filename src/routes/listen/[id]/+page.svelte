@@ -29,7 +29,7 @@
 	import { acquireWakeLock, releaseWakeLock } from '$lib/wakeLock';
 
 	let wakeLockHeld = false;
-	import { t, list_items_open } from '$lib/i18n.svelte';
+	import { t, list_items_open, currentLang } from '$lib/i18n.svelte';
 	import { getCategoryKey } from '$lib/categories';
 	import { getCategoryPreferenceAction } from '$lib/categoryPreferences';
 	import { userSettings } from '$lib/userSettings.svelte';
@@ -625,7 +625,7 @@
 				</div>
 			{:else if displayItems.length === 0 && searchQuery.trim()}
 				<div class="text-center py-12">
-					<p class="text-sm" style="color: var(--color-on-surface-variant)">Keine Ergebnisse</p>
+					<p class="text-sm" style="color: var(--color-on-surface-variant)">{currentLang() === 'en' ? 'No results' : 'Keine Ergebnisse'}</p>
 				</div>
 			{:else if displayItems.length > 0}
 

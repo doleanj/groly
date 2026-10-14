@@ -4,6 +4,7 @@
 	import HamburgerMenu from '$lib/components/HamburgerMenu.svelte';
 	import AppBottomNav from '$lib/components/AppBottomNav.svelte';
 	import { t, currentLang } from '$lib/i18n.svelte';
+	import { localizeServerError } from '$lib/serverErrors';
 
 	let { data } = $props();
 
@@ -63,7 +64,7 @@
 		const name = caffeineAddName.trim();
 		const ml = Math.round(Number(caffeineAddMl));
 		const mg = Math.round(Number(caffeineAddMg));
-		if (!name || !ml || ml <= 0 || mg < 0) { caffeineAddError = 'Alle Felder ausfüllen'; return; }
+		if (!name || !ml || ml <= 0 || mg < 0) { caffeineAddError = currentLang() === 'en' ? 'Fill in all fields' : 'Alle Felder ausfüllen'; return; }
 		caffeineAddSaving = true;
 		caffeineAddError = '';
 		try {
@@ -78,7 +79,7 @@
 			caffeineAddMg = '';
 			await loadCaffeineDrinks();
 		} catch {
-			caffeineAddError = 'Fehler beim Speichern';
+			caffeineAddError = currentLang() === 'en' ? 'Could not save' : 'Fehler beim Speichern';
 		}
 		caffeineAddSaving = false;
 	}
@@ -174,7 +175,7 @@
 			await loadUsers();
 		} else {
 			const d = await res.json();
-			editError = d.error ?? 'Fehler';
+			editError = localizeServerError(d.error, currentLang()) ?? (currentLang() === 'en' ? 'Error' : 'Fehler');
 		}
 	}
 
@@ -208,7 +209,7 @@
 				loadUsers();
 			} else {
 				const d = await res.json();
-				userError = d.error ?? 'Fehler';
+				userError = localizeServerError(d.error, currentLang()) ?? (currentLang() === 'en' ? 'Error' : 'Fehler');
 			}
 		} finally {
 			creating = false;
@@ -270,7 +271,7 @@
 			await loadUsers();
 		} else {
 			const d = await res.json();
-			editError = d.error ?? 'Fehler';
+			editError = localizeServerError(d.error, currentLang()) ?? (currentLang() === 'en' ? 'Error' : 'Fehler');
 		}
 	}
 
@@ -283,7 +284,7 @@
 			editUser = null;
 		} else {
 			const d = await res.json();
-			editError = d.error ?? 'Fehler';
+			editError = localizeServerError(d.error, currentLang()) ?? (currentLang() === 'en' ? 'Error' : 'Fehler');
 		}
 	}
 
@@ -566,8 +567,8 @@
 	async function saveCatalog() {
 		if (!catalogForm) return;
 		const { header: parsed, nutrients } = parseCombinedText(catalogForm.text);
-		if (!parsed.name.trim()) { catalogError = 'Name erforderlich'; return; }
-		if (!parsed.unit.trim()) { catalogError = 'Einheit erforderlich'; return; }
+		if (!parsed.name.trim()) { catalogError = currentLang() === 'en' ? 'Name required' : 'Name erforderlich'; return; }
+		if (!parsed.unit.trim()) { catalogError = currentLang() === 'en' ? 'Unit required' : 'Einheit erforderlich'; return; }
 
 		catalogSaving = true;
 		catalogError = '';
@@ -597,8 +598,8 @@
 				return;
 			}
 			if (!res.ok) {
-				let errMsg = 'Fehler';
-				try { const d = await res.json(); errMsg = d.error ?? errMsg; } catch {}
+				let errMsg = currentLang() === 'en' ? 'Error' : 'Fehler';
+				try { const d = await res.json(); errMsg = localizeServerError(d.error, currentLang()) ?? errMsg; } catch {}
 				catalogError = errMsg;
 				return;
 			}
@@ -613,7 +614,7 @@
 				closeCatalogForm();
 			}
 		} catch (e) {
-			catalogError = e instanceof Error ? e.message : 'Unbekannter Fehler';
+			catalogError = e instanceof Error ? e.message : (currentLang() === 'en' ? 'Unknown error' : 'Unbekannter Fehler');
 		} finally {
 			catalogSaving = false;
 		}
@@ -1277,7 +1278,7 @@
 						</div>
 						<!-- Brand -->
 						<div class="rounded-lg px-3 py-2" style="background-color: var(--color-surface-low)">
-							<p class="text-[10px] mb-0.5" style="color: var(--color-on-surface-variant); opacity: 0.7">Hersteller</p>
+							<p class="text-[10px] mb-0.5" style="color: var(--color-on-surface-variant); opacity: 0.7">{currentLang() === 'en' ? 'Manufacturer' : 'Hersteller'}</p>
 							<input
 								type="text"
 								bind:value={catalogPreview[i].brand}
@@ -1298,7 +1299,7 @@
 						<!-- Unit + PackageSize -->
 						<div class="flex gap-2">
 							<div class="flex-1 rounded-lg px-3 py-2" style="background-color: var(--color-surface-low)">
-								<p class="text-[10px] mb-0.5" style="color: var(--color-on-surface-variant); opacity: 0.7">Einheit</p>
+								<p class="text-[10px] mb-0.5" style="color: var(--color-on-surface-variant); opacity: 0.7">{currentLang() === 'en' ? 'Unit' : 'Einheit'}</p>
 								<input
 									type="text"
 									bind:value={catalogPreview[i].unit}
@@ -1307,7 +1308,7 @@
 								/>
 							</div>
 							<div class="w-28 rounded-lg px-3 py-2" style="background-color: var(--color-surface-low)">
-								<p class="text-[10px] mb-0.5" style="color: var(--color-on-surface-variant); opacity: 0.7">Packung</p>
+								<p class="text-[10px] mb-0.5" style="color: var(--color-on-surface-variant); opacity: 0.7">{currentLang() === 'en' ? 'Package' : 'Packung'}</p>
 								<input
 									type="number"
 									bind:value={catalogPreview[i].packageSize}
@@ -1446,17 +1447,17 @@
 							{/if}
 							{#if preview.brand}
 								<span class="text-[11px]" style="color: var(--color-on-surface-variant)">
-									<span style="opacity: 0.6">Marke:</span> {preview.brand}
+									<span style="opacity: 0.6">{currentLang() === 'en' ? 'Brand:' : 'Marke:'}</span> {preview.brand}
 								</span>
 							{/if}
 							{#if preview.unit}
 								<span class="text-[11px]" style="color: var(--color-on-surface-variant)">
-									<span style="opacity: 0.6">Einheit:</span> {preview.unit}
+									<span style="opacity: 0.6">{currentLang() === 'en' ? 'Unit:' : 'Einheit:'}</span> {preview.unit}
 								</span>
 							{/if}
 							{#if preview.packageSize != null}
 								<span class="text-[11px]" style="color: var(--color-on-surface-variant)">
-									<span style="opacity: 0.6">Inhalt:</span> {preview.packageSize}
+									<span style="opacity: 0.6">{currentLang() === 'en' ? 'Contents:' : 'Inhalt:'}</span> {preview.packageSize}
 								</span>
 							{/if}
 						</div>
