@@ -27,6 +27,7 @@ services:
     restart: unless-stopped
     labels:
       - com.centurylinklabs.watchtower.enable=true
+      - com.centurylinklabs.watchtower.scope=groly
     healthcheck:
       # /login is public (200); upstream's /api/auth/me answers 401 when logged out, which marked the container unhealthy.
       test: ["CMD", "wget", "-qO", "/dev/null", "http://127.0.0.1:3000/login"]
@@ -47,9 +48,13 @@ services:
       - "8097:8080"
     environment:
       - WATCHTOWER_LABEL_ENABLE=true
+      # Scoped: an unscoped Watchtower stops and removes every other unscoped one at startup (groly removed finances', 2026-10-15).
+      - WATCHTOWER_SCOPE=groly
       - WATCHTOWER_CLEANUP=true
       - WATCHTOWER_POLL_INTERVAL=${WATCHTOWER_POLL_INTERVAL:-300}
       - WATCHTOWER_NOTIFICATIONS_HOSTNAME=groly
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     restart: unless-stopped
+    labels:
+      - com.centurylinklabs.watchtower.scope=groly
